@@ -1,0 +1,11 @@
+% Definição dos parâmetros do reator
+V     = 1;         % Volume do reator (m^3)
+dE    = 11843;     % Energia de ativação (J/mol)
+rhocp = 500;       % Densidade*Capacidade térmica (J/(K*m^3))
+R     = 1.987;     % Constante de gás ideal (L/(mol*K))
+UA    = 150;       % Coef. geral transf. calor*área para troca de calor (J/(Kh))
+k0    = 9703*3600; % Fator pré-exponencial (h^-1)
+dH    = -5960;     % Calor de reação (J/mol)
+
+% Ponto de operação
+Fs = 1 % (m^3/h)
