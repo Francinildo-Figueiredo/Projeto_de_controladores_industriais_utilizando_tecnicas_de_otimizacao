@@ -26,3 +26,34 @@ dCadt = (Fs/V)*(Cafs - Cas) - r;
 % Da equação de balanço de energia, obtemos
 dTdt  = (Fs/V)*(Tfs - Ts) + (-dH/rhocp)*r - (UA/(V*rhocp))*(Ts - Tjs);
 
+% Obtendo o modelo linearizado em espaço de estados
+drdCas = k0*exp(-dE/(R*Ts));
+drdTs   = dE/(R*Ts^2)*r;
+
+A11 = -Fs/V - drdCas;
+A12 = -drdTs;
+A21 = (-dH/rhocp)*drdCas;
+A22 = -Fs/V + (-dH/rhocp)*drdTs - UA/(V*rhocp);
+A = [A11, A12; A21, A22];
+
+Bu1 = (Cafs - Cas)/V;
+Bu2 = (Tfs - Ts)/V;
+Bu = [Bu1; Bu2];
+
+Bd11 = Fs/V;
+Bd12 = 0;
+Bd13 = 0;
+Bd21 = 0;
+Bd22 = Fs/V;
+Bd23 = UA/(V*rhocp);
+Bd = [Bd11, Bd12, Bd13; Bd21, Bd22, Bd23];
+
+B = horzcat(Bu, Bd);
+C = [1, 0];
+D = [0, 0, 0, 0];
+
+G = ss(A, B, C, D);
+
+% Convertendo os modelos do tempo contínuo para discreto
+
+
