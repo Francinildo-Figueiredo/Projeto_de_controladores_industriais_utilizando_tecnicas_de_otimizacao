@@ -54,6 +54,23 @@ D = [0, 0, 0, 0];
 
 G = ss(A, B, C, D);
 
-% Convertendo os modelos do tempo contínuo para discreto
+% Convertendo os modelos do tempo contínuo para discreto Ta = 0.2 h, 0.5 h,
+% 1.5 h
 
+% Gd1 = c2d(G, 0.2, 'zoh');
+% Gd2 = c2d(G, 0.5, 'zoh');
+% Gd3 = c2d(G, 1.5, 'zoh');
+
+% Plotando os gráficos
+set_param('CSRT_NL/To Workspace','VariableName','CaNL');
+out1 = sim('CSRT_NL');
+plot(out1.CaNL);
+hold on;
+set_param('CSRT_Linear/To Workspace','VariableName','CaLinear');
+out2 = sim('CSRT_Linear');
+plot(out2.CaLinear);
+legend('Não linear', 'Linear', 'Location', 'Best');
+xlabel('t (h)');
+ylabel('Ca (kgmol/m^3)');
+grid on;
 
