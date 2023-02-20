@@ -1,3 +1,5 @@
+%% Experimento 2: Linearização e Discretização de Sistemas (CSRT)
+%%
 % Definição dos parâmetros do reator
 V     = 1;         % Volume do reator (m^3)
 dE    = 11843;     % Energia de ativação (J/mol)
@@ -15,8 +17,8 @@ Tjs  = 298;   % Temperatura da capa (K)
 Ts   = 311.2; % Temperatura do reator (K)
 Cas  = 8.564; % Concentração de A no reator ((kg*mol)/m^3)
 
-% Modelando as equações dinâmicas na forma de variáveis de estado
-
+%% Modelando as equações dinâmicas
+%%
 % Definindo a expressão para a taxa de reação por unidade de volume
 r = k0*exp(-dE/(R*Ts))*Cas;
 
@@ -26,7 +28,8 @@ dCadt = (Fs/V)*(Cafs - Cas) - r;
 % Da equação de balanço de energia, obtemos
 dTdt  = (Fs/V)*(Tfs - Ts) + (-dH/rhocp)*r - (UA/(V*rhocp))*(Ts - Tjs);
 
-% Obtendo o modelo linearizado em espaço de estados
+%% Obtendo o modelo linearizado em espaço de estados
+%%
 drdCas = k0*exp(-dE/(R*Ts));
 drdTs   = dE/(R*Ts^2)*r;
 
@@ -54,6 +57,15 @@ D = [0, 0, 0, 0];
 
 G = ss(A, B, C, D);
 
+%% Obtendo o modelo no domínio de Laplace
+%%
+
+I   = eye(2,2); 
+G   = C*(s*I - A)^(-1)*Bu;
+Gd1 = C*(s*I - A)^(-1)*B(:,1);
+Gd2 = C*(s*I - A)^(-1)*B(:,2);
+Gd3 = C*(s*I - A)^(-1)*B(:,3);
+
 % Convertendo os modelos do tempo contínuo para discreto Ta = 0.2 h, 0.5 h,
 % 1.5 h
 
@@ -61,13 +73,22 @@ G = ss(A, B, C, D);
 % Gd2 = c2d(G, 0.5, 'zoh');
 % Gd3 = c2d(G, 1.5, 'zoh');
 
-set_param('CSRT_NL/To Workspace','VariableName','Ca_NL');
+%% Comparando as simulações do modelo linear e não linear, para uma pequena
+%% variação na entrada
+%%
+set_param('CSRT_NL/To Workspace','VariableName','CaNL');
 out1 = sim('CSRT_NL');
-set_param('CSRT_NL/To Workspace','VariableName','Ca_NL');
-out1 = sim('CSRT_NL');
-plot(out.Ca_NL);
-grid on;
-legend('Não linear');
+plot(out1.CaNL);
 hold on;
-
-
+set_param('CSRT_Linear/To Workspace','VariableName','CaLinear');
+out2 = sim('CSRT_Linear');
+plot(out2.CaLinear, 'y');
+hold on;
+set_param('CSRT_LinearTF/To Workspace','VariableName','CaLinearTF');
+out3 = sim('CSRT_LinearTF');
+plot(out3.CaLinearTF, '--k');
+legend('Não linear', 'Linear', 'Linear TF', 'Location', 'Best');
+title('Comparando as saídas das três simulações realizadas');
+xlabel('t (h)');
+ylabel('Ca (kgmol/m^3)');
+grid on;
