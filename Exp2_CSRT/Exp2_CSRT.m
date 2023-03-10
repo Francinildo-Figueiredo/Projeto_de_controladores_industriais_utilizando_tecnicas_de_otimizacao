@@ -55,40 +55,46 @@ B = horzcat(Bu, Bd);
 C = [1, 0];
 D = [0, 0, 0, 0];
 
-G = ss(A, B, C, D);
+Gss = ss(A, B, C, D);
 
 %% Obtendo o modelo no domínio de Laplace
 %%
-
+s   = tf('s');
 I   = eye(2,2); 
 G   = C*(s*I - A)^(-1)*Bu;
 Gd1 = C*(s*I - A)^(-1)*B(:,1);
 Gd2 = C*(s*I - A)^(-1)*B(:,2);
 Gd3 = C*(s*I - A)^(-1)*B(:,3);
 
-% Convertendo os modelos do tempo contínuo para discreto Ta = 0.2 h, 0.5 h,
-% 1.5 h
-
-% Gd1 = c2d(G, 0.2, 'zoh');
-% Gd2 = c2d(G, 0.5, 'zoh');
-% Gd3 = c2d(G, 1.5, 'zoh');
-
 %% Comparando as simulações do modelo linear e não linear, para uma pequena
 %% variação na entrada
 %%
-set_param('CSRT_NL/To Workspace','VariableName','CaNL');
-out1 = sim('CSRT_NL');
+figure(1);
+out1 = sim('CSRT_NL', 'ReturnWorkspaceOutputs', 'on');
 plot(out1.CaNL);
 hold on;
-set_param('CSRT_Linear/To Workspace','VariableName','CaLinear');
-out2 = sim('CSRT_Linear');
+out2 = sim('CSRT_Linear', 'ReturnWorkspaceOutputs', 'on');
 plot(out2.CaLinear, 'y');
 hold on;
-set_param('CSRT_LinearTF/To Workspace','VariableName','CaLinearTF');
-out3 = sim('CSRT_LinearTF');
+out3 = sim('CSRT_LinearTF', 'ReturnWorkspaceOutputs', 'on');
 plot(out3.CaLinearTF, '--k');
 legend('Não linear', 'Linear', 'Linear TF', 'Location', 'Best');
 title('Comparando as saídas das três simulações realizadas');
+xlabel('t (h)');
+ylabel('Ca (kgmol/m^3)');
+grid on;
+
+%% Convertendo os modelos do tempo contínuo para discreto Ta = 0.2 h, 0.5 h, 1.5 h
+%% 
+Gdisc1 = c2d(Gss, 0.2, 'zoh');
+Gdisc2 = c2d(Gss, 0.5, 'zoh');
+Gdisc3 = c2d(Gss, 1.5, 'zoh');
+
+figure(2);
+out4 = sim('CSRT_Discreto', 'ReturnWorkspaceOutputs', 'on');
+plot(out4.Ca_Discreto);
+legend('Contínuo', 'Ta = 0.1 h', 'Ta = 0.5 h', 'Ta = 1.5 h', 'Location', 'Best');
+title('Saídas do sistema contínuo e discretizado');
 xlabel('t (h)');
 ylabel('Ca (kgmol/m^3)');
 grid on;
