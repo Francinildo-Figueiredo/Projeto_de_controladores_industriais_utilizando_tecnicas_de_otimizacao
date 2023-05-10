@@ -22,11 +22,12 @@ emqG11 = mean((Ca_F - (Ca_Fsim+Ca_F(1))).^2);
 disp(['Erro médio ao quadrado de G11: ' num2str(emqG11)]);
 figure(1);
 plot(t,Ca_F, '--', t,Ca_Fsim+Ca_F(1), '-');
-title('Teste do degrau e simulação de G11 identificado para dF = 0.01 m^3/h');
+%title('Teste do degrau e simulação de G11 identificado para dF = 0.01 m^3/h');
+title(' ');
 grid on;
-legend('Modelo não linear', 'Modelo G11 identificado', 'Location', 'Best');
-xlabel('t (h)');
-ylabel('Ca (kgmol/m^3)');
+legend('Modelo não linear', 'Modelo G11 identificado', 'Location', 'Best', 'FontSize', 13);
+xlabel('t (h)', 'FontSize', 13);
+ylabel('Ca (kgmol/m^3)', 'FontSize', 13);
 
 % Identificação da função de transferência G12(s): saída Ca, perturbação Caf
 dFj = 0; dCaf = 0.007; dTf = 0; dTj = 0;
@@ -41,11 +42,12 @@ emqG12 = mean((Ca_Caf - (Ca_Cafsim+Ca_Caf(1))).^2);
 disp(['Erro médio ao quadrado de G12: ' num2str(emqG12)]);
 figure(2);
 plot(t,Ca_Caf, '--', t,Ca_Cafsim+Ca_Caf(1), '-');
-title('Teste do degrau e simulação de G12 identificado para dCaf = 0.007 kgmol/m^3');
+%title('Teste do degrau e simulação de G12 identificado para dCaf = 0.007 kgmol/m^3');
+title(' ');
 grid on;
-legend('Modelo não linear', 'Modelo G12 identificado', 'Location', 'Best');
-xlabel('t (h)');
-ylabel('Ca (kgmol/m^3)');
+legend('Modelo não linear', 'Modelo G12 identificado', 'Location', 'Best', 'FontSize', 13);
+xlabel('t (h)', 'FontSize', 13);
+ylabel('Ca (kgmol/m^3)', 'FontSize', 13);
 
 % Identificação da função de transferência G13(s): saída Ca, perturbação Tf
 dFj = 0; dCaf = 0; dTf = 1; dTj = 0;
@@ -60,11 +62,12 @@ emqG13 = mean((Ca_Tf - (Ca_Tfsim+Ca_Tf(1))).^2);
 disp(['Erro médio ao quadrado de G13: ' num2str(emqG13)]);
 figure(3);
 plot(t,Ca_Tf, '--', t,Ca_Tfsim+Ca_Tf(1), '-');
-title('Teste do degrau e simulação de G13 identificado para dTf = 1 K');
+%title('Teste do degrau e simulação de G13 identificado para dTf = 1 K');
+title(' ');
 grid on;
-legend('Modelo não linear', 'Modelo G13 identificado', 'Location', 'Best');
-xlabel('t (h)');
-ylabel('Ca (kgmol/m^3)');
+legend('Modelo não linear', 'Modelo G13 identificado', 'Location', 'Best', 'FontSize', 13);
+xlabel('t (h)', 'FontSize', 13);
+ylabel('Ca (kgmol/m^3)', 'FontSize', 13);
 
 % Identificação da função de transferência G14(s): saída Ca, perturbação Tj
 dFj = 0; dCaf = 0; dTf = 0; dTj = 1;
@@ -79,8 +82,9 @@ emqG14 = mean((Ca_Tj - (Ca_Tjsim+Ca_Tj(1))).^2);
 disp(['Erro médio ao quadrado de G14: ' num2str(emqG14)]);
 figure(4);
 plot(t,Ca_Tj, '--', t,Ca_Tjsim+Ca_Tj(1), '-');
-title('Teste do degrau e simulação de G14 identificado para dTj = 1 K');
+%title('Teste do degrau e simulação de G14 identificado para dTj = 1 K');
+title(' ');
 grid on;
-legend('Modelo não linear', 'Modelo G14 identificado', 'Location', 'Best');
-xlabel('t (h)');
-ylabel('Ca (kgmol/m^3)');
+legend('Modelo não linear', 'Modelo G14 identificado', 'Location', 'Best', 'FontSize', 13);
+xlabel('t (h)', 'FontSize', 13);
+ylabel('Ca (kgmol/m^3)', 'FontSize', 13);
