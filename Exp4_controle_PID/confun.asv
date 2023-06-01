@@ -1,0 +1,10 @@
+function [C,Ceq]=confun(x,G,MS_max,MT_max)
+    Kp=x(1); Ki=x(2); Kd=x(3);
+    K=Kp + Ki/s + Kd*s/(1+0.01*s); % Controlador PID
+    MS=norm(feedback(1,G*K),inf);                 % Margem de estabilidade
+    MT=norm(feedback(G*K,1),inf);                 % 
+    stab=norm(feedback(G*K,1)); % Norma 2 da função de sensibilidade complementar
+    if stab<inf, C=[MS-MS_max; MT-MT_max];
+    else C=[1; 1]; end
+    Ceq=[];
+return

@@ -11,3 +11,8 @@ Sis_id = lsim(G, mv1_aq - duty_op, t);
 
 figure(1);
 plot(t,pv1_aq, t, Sis_id+pv1_aq(1));
+
+pv1_resf = dobtidos.pv1(668:end-7);
+mv1_resf = dobtidos.mv1(668:end-7);
+
+
