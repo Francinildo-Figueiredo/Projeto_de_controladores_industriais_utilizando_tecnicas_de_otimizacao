@@ -72,13 +72,14 @@ MTb=norm(feedback(pade(G)*Kpid2,1),inf)
 Jvb=norm(feedback(pade(G)/s,Kpid2),inf)
 Jub=norm(feedback(Kpid2, pade(G)),inf)
 
-% 
+% Critérios de restrição
 MS_max=1.5;
 MT_max=1.01;
 %Jv_max=0.66;
 Ju_max=100;
 x = [Kp2, Ki2, Kd2];
 
+% Otimização dos parâmetro do controlador
 options = optimset('Algorithm','active-set');
 x=fmincon(@(x) objfun(x,s,G),x,[],[],[],[],...
 [], [], @(x)confun(x,s,G,MS_max,MT_max,Ju_max), options);

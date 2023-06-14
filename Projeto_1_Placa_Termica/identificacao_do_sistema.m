@@ -161,6 +161,12 @@ Ti11 = min(T11_med, 8*L11_med);
 
 Cpi11 = pid(Kp11, Kp11/Ti11);
 H11 =feedback(Cpi11*G11_med,1);
+step(H11);
+hold on;
+stepinfo(H11);
+t = 0:1:250;
+Sis_id_resf = lsim(H11, -1*ones(size(t)), t);
+plot(t+250, Sis_id_resf);
 
 % PI para o modelo médio de G22
 Kp22 = T22_med/(2*K22_med*L22_med);
@@ -168,3 +174,39 @@ Ti22 = min(T22_med, 8*L22_med);
 
 Cpi22 = pid(Kp22, Kp22/Ti22);
 H22 =feedback(Cpi22*G22_med,1);
+
+%% Otimização dos controladores
+
+s = tf('s');
+
+% Criterios antes da otimização
+MSb=norm(feedback(1,pade(G11_med)*Cpi11),inf)
+MTb=norm(feedback(pade(G11_med)*Cpi11,1),inf)
+Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
+Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
+
+% Critérios de restrição
+MS_max=1.5;
+%MT_max=1.3;
+Jv_max=0.15;
+Ju_max=15;
+x = [Kp11, Kp11/Ti11, 0];
+
+% Otimização dos parâmetro do controlador PI
+options = optimset('Algorithm','active-set');
+x=fmincon(@(x) objfun(x,s,G11_med),x,[],[],[],[],...
+[], [], @(x)confun(x,s,G11_med,MS_max,Jv_max,Ju_max), options);
+
+Kp = x(1); Ki = x(2); Kd = x(3);
+Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
+H = feedback(G11_med*Kpid,1);
+
+% Critérios após a otimização
+MSb=norm(feedback(1,pade(G11_med)*Kpid),inf)
+MTb=norm(feedback(pade(G11_med)*Kpid,1),inf)
+Jvb=norm(feedback(pade(G11_med)/s,Kpid),inf)
+Jub=norm(feedback(Kpid, pade(G11_med)),inf)
+
+step(H11);
+hold on;
+step(H);
