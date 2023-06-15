@@ -1,4 +1,10 @@
+%% Dados obtidos
 dobtidos = load('exp23052023115431.mat');
+plot(dobtidos.pv2(1:end-1));
+title('Medições de temperatura obtidas na PV2');
+xlim([0, 1050]);
+xlabel('t(s)');
+ylabel('T(°C)');
 
 %% Aquecimento da Malha 1
 pv1_aq = dobtidos.pv1(275:667);
@@ -152,6 +158,10 @@ L22_med = (L22_aq + L22_resf)/2;
 
 G22_med = tf(K22_med, [T22_med 1], 'iodelay', L22_med);
 
+figure(9);
+plot(t,pv2-pv2(1), t, Sis_id);
+title('MV2 e PV2 modelo médio');
+
 %% Projetando os controladores PI ulizando o método SIMC, com \tau_c = \theta
 %% Com base nos parâmetros dos modelos médios de G11 e G22
 
@@ -174,8 +184,30 @@ Ti22 = min(T22_med, 8*L22_med);
 
 Cpi22 = pid(Kp22, Kp22/Ti22);
 H22 =feedback(Cpi22*G22_med,1);
+step(H22);
+hold on;
+stepinfo(H22);
 
-%% Otimização dos controladores
+% Controle em malha fechada da PV1
+load('exp06062023090333.mat')
+plot(pv1(2:end)-pv1(2)); hold on; plot(sp1(2:end)-sp1(2));
+xlim([0, 405]);
+title('Controle em malha fechada da variável de processo 1');
+legend('Temperatura de saída','Temperatura de referência', 'Location', 'best')
+xlabel('t(s)');
+ylabel('T(°C)');
+
+% Controle em malha fechada da PV2
+load('exp06062023092511.mat')
+plot(pv2(440:end)-pv2(440)); hold on; plot(sp2(440:end)-sp2(440));
+xlim([0, 518]);
+title('Controle em malha fechada da variável de processo 2');
+legend('Temperatura de saída','Temperatura de referência', 'Location', 'best')
+xlabel('t(s)');
+ylabel('T(°C)');
+
+
+%% Otimização dos controlador PI da malha 1
 
 s = tf('s');
 
@@ -186,27 +218,69 @@ Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
 Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
 
 % Critérios de restrição
-MS_max=1.5;
-%MT_max=1.3;
-Jv_max=0.15;
-Ju_max=15;
+MS_max=1.6;
+MT_max=1.0;
+% Jv_max=0.15;
+Ju_max=13;
 x = [Kp11, Kp11/Ti11, 0];
 
 % Otimização dos parâmetro do controlador PI
 options = optimset('Algorithm','active-set');
 x=fmincon(@(x) objfun(x,s,G11_med),x,[],[],[],[],...
-[], [], @(x)confun(x,s,G11_med,MS_max,Jv_max,Ju_max), options);
+[], [], @(x)confun(x,s,G11_med,MS_max,MT_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
 Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
 H = feedback(G11_med*Kpid,1);
 
 % Critérios após a otimização
-MSb=norm(feedback(1,pade(G11_med)*Kpid),inf)
-MTb=norm(feedback(pade(G11_med)*Kpid,1),inf)
-Jvb=norm(feedback(pade(G11_med)/s,Kpid),inf)
-Jub=norm(feedback(Kpid, pade(G11_med)),inf)
+MS=norm(feedback(1,pade(G11_med)*Kpid),inf)
+MT=norm(feedback(pade(G11_med)*Kpid,1),inf)
+Jv=norm(feedback(pade(G11_med)/s,Kpid),inf)
+Ju=norm(feedback(Kpid, pade(G11_med)),inf)
 
 step(H11);
+title('Resposta ao degrau para a malha 1');
 hold on;
 step(H);
+legend('SIMC', 'Otimizado', 'Location','southeast');
+stepinfo(H)
+
+%% Otimização dos controlador PI da malha 2
+
+s = tf('s');
+
+% Criterios antes da otimização
+MSb=norm(feedback(1,pade(G22_med)*Cpi22),inf)
+MTb=norm(feedback(pade(G22_med)*Cpi22,1),inf)
+Jvb=norm(feedback(pade(G22_med)/s,Cpi22),inf)
+Jub=norm(feedback(Cpi22, pade(G22_med)),inf)
+
+% Critérios de restrição
+MS_max=1.6;
+MT_max=1.0;
+% Jv_max=0.15;
+Ju_max=20.4;
+x = [Kp22, Kp22/Ti22, 0];
+
+% Otimização dos parâmetro do controlador PI
+options = optimset('Algorithm','active-set');
+x=fmincon(@(x) objfun(x,s,G22_med),x,[],[],[],[],...
+[], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Ju_max), options);
+
+Kp = x(1); Ki = x(2); Kd = x(3);
+Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
+H = feedback(G22_med*Kpid,1);
+
+% Critérios após a otimização
+MS=norm(feedback(1,pade(G22_med)*Kpid),inf)
+MT=norm(feedback(pade(G22_med)*Kpid,1),inf)
+Jv=norm(feedback(pade(G22_med)/s,Kpid),inf)
+Ju=norm(feedback(Kpid, pade(G22_med)),inf)
+
+step(H22);
+title('Resposta ao degrau para a malha 2');
+hold on;
+step(H,'y--');
+legend('SIMC', 'Otimizado', 'Location','southeast');
+stepinfo(H)

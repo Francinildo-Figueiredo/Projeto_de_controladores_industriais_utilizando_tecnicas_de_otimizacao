@@ -17,6 +17,7 @@ for i = 1:1:length(Kp)
         K=Kp(i) + Ki(j)/s; %+ Kd*s/(1+0.01*s); % Controlador PID
         stab=norm(feedback(pade(G)*K,1)); % Norma 2 da função de sensibilidade complementar
         if stab<inf 
+            disp(i);
             options = optimset('Algorithm','active-set');
             x = fmincon(@(x0) objfun(x0,s,G),x0,[],[],[],[],...
             [], [], @(x0)confun(x0,s,G,MS_max,MT_max,Ju_max), options);
@@ -24,7 +25,6 @@ for i = 1:1:length(Kp)
         else
             Jv(i,j) = NaN; 
         end
-        disp(i);
     end
 end
 
