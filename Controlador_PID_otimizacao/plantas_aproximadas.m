@@ -35,14 +35,15 @@ step(H1);
 %%
 
 s=tf('s'); 
-% G=1/((1+s)*(1+0.5*s)*(1+0.25*s)); % G1
-G=1/(1+s)^3;                      % G2
+
+G=1/(1+s)^3;                        % G1
+% G=exp(-0.3*s)/((1+s)*(1+0.5*s));   % G2
+
 
 % 2ª ordem
 T = 0;
-%taui = [1, 0.5, 0.25]; % G1
+%taui = [1, 0.5, 0];   % G1
 taui = [1, 1, 1];      % G2
-% taui = [1, 0.5, 0];   % G3
 %taui = [1, 0.2, 0];    %G4
 %taui = [1,1,1,1];
 theta0 = 0;
@@ -95,7 +96,7 @@ MS=norm(feedback(1,pade(G)*Kpid),inf)
 MT=norm(feedback(pade(G)*Kpid,1),inf)
 step(H);
 stepinfo(H)
-title('Planta G_2');
+title('Planta G_1');
 legend('Controlador SIMC', 'Controlador otimizado', 'location', 'best','FontSize', 10);
 grid on;
 

@@ -158,9 +158,9 @@ L22_med = (L22_aq + L22_resf)/2;
 
 G22_med = tf(K22_med, [T22_med 1], 'iodelay', L22_med);
 
-figure(9);
-plot(t,pv2-pv2(1), t, Sis_id);
-title('MV2 e PV2 modelo médio');
+% figure(9);
+% plot(t,pv2-pv2(1), t, Sis_id);
+% title('MV2 e PV2 modelo médio');
 
 %% Projetando os controladores PI ulizando o método SIMC, com \tau_c = \theta
 %% Com base nos parâmetros dos modelos médios de G11 e G22
@@ -251,22 +251,24 @@ stepinfo(H)
 s = tf('s');
 
 % Criterios antes da otimização
-MSb=norm(feedback(1,pade(G22_med)*Cpi22),inf)
+MSb=norm(feedback(1,pade(G22_med*Cpi22)),inf)
 MTb=norm(feedback(pade(G22_med)*Cpi22,1),inf)
 Jvb=norm(feedback(pade(G22_med)/s,Cpi22),inf)
 Jub=norm(feedback(Cpi22, pade(G22_med)),inf)
 
 % Critérios de restrição
-MS_max=1.6;
-MT_max=1.0;
-% Jv_max=0.15;
-Ju_max=20.4;
-x = [Kp22, Kp22/Ti22, 0];
+MS_max=1.8;
+MT_max=1.005;
+Jv_max=inf;
+Ju_max=inf;
+Ki22 = Kp22/Ti22;
+% x = [Kp22, Ki22, 0];
+x = [12, 0.1, 0];
 
 % Otimização dos parâmetro do controlador PI
 options = optimset('Algorithm','active-set');
-x=fmincon(@(x) objfun(x,s,G22_med),x,[],[],[],[],...
-[], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Ju_max), options);
+x=fmincon(@(x) objfun_Ki(x),x,[],[],[],[],...
+[], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Jv_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
 Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
@@ -281,6 +283,6 @@ Ju=norm(feedback(Kpid, pade(G22_med)),inf)
 step(H22);
 title('Resposta ao degrau para a malha 2');
 hold on;
-step(H,'y--');
+step(H);
 legend('SIMC', 'Otimizado', 'Location','southeast');
 stepinfo(H)
