@@ -19,8 +19,6 @@ phi = [1 1/s s/(0.1*s+1)];
 C2 = rho2*phi';
 
 C = [C1 0; 0 C2];
-Re = zeros(size(G,2), 1, 3, 92);
-% Im = zeros(size(G,2), 1, 3, 92);
 for j = 1:size(G,2)
     aux = phi*G(j,j);
 %     for n = 1:1:3
