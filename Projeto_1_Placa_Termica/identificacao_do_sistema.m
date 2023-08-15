@@ -259,7 +259,7 @@ Jub=norm(feedback(Cpi22, pade(G22_med)),inf)
 % Critérios de restrição
 MS_max=1.8;
 MT_max=1.005;
-Jv_max=inf;
+% Jv_max=inf;
 Ju_max=inf;
 Ki22 = Kp22/Ti22;
 % x = [Kp22, Ki22, 0];
@@ -268,7 +268,7 @@ x = [12, 0.1, 0];
 % Otimização dos parâmetro do controlador PI
 options = optimset('Algorithm','active-set');
 x=fmincon(@(x) objfun_Ki(x),x,[],[],[],[],...
-[], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Jv_max,Ju_max), options);
+[], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
 Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
@@ -282,6 +282,51 @@ Ju=norm(feedback(Kpid, pade(G22_med)),inf)
 
 step(H22);
 title('Resposta ao degrau para a malha 2');
+hold on;
+step(H);
+legend('SIMC', 'Otimizado', 'Location','southeast');
+stepinfo(H)
+
+%% Otimização por meio do CVX
+
+s = tf('s');
+
+% Criterios antes da otimização
+MSb=norm(feedback(1,pade(G11_med)*Cpi11),inf)
+MTb=norm(feedback(pade(G11_med)*Cpi11,1),inf)
+Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
+Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
+
+% Critérios de restrição
+MS_max=1.6;
+MT_max=1.0;
+% Jv_max=0.15;
+Ju_max=13;
+% x = [Kp11, Kp11/Ti11, 0];
+Fd = [1 1/s s/(1+0.01*s)];
+n = 3;
+
+cvx_begin
+    variable x(1,n)
+    minimize(norm(feedback(pade(G11_med)/s,x*Fd'),inf))
+    subject to
+        norm(feedback(1,pade(G11_med)*(x*Fd')),inf) <= MS_max
+        norm(feedback(pade(G11_med)*(x*Fd'),1),inf) <= MT_max
+        norm(feedback(x*Fd', pade(G11_med)),inf)    <= Ju_max
+cvx_end
+
+Kp = x(1); Ki = x(2); Kd = x(3);
+Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
+H = feedback(G11_med*Kpid,1);
+
+% Critérios após a otimização
+MS=norm(feedback(1,pade(G11_med)*Kpid),inf)
+MT=norm(feedback(pade(G11_med)*Kpid,1),inf)
+Jv=norm(feedback(pade(G11_med)/s,Kpid),inf)
+Ju=norm(feedback(Kpid, pade(G11_med)),inf)
+
+step(H11);
+title('Resposta ao degrau para a malha 1');
 hold on;
 step(H);
 legend('SIMC', 'Otimizado', 'Location','southeast');
