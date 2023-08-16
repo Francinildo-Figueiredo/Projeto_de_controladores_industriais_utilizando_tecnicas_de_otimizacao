@@ -298,10 +298,10 @@ Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
 Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
 
 % Critérios de restrição
-MS_max=1.6;
-MT_max=1.0;
+MS_max=1.8;
+MT_max=1.5;
 % Jv_max=0.15;
-Ju_max=13;
+Ju_max=100;
 % x = [Kp11, Kp11/Ti11, 0];
 Fd = [1 1/s s/(1+0.01*s)];
 n = 3;
