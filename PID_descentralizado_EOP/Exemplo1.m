@@ -20,10 +20,6 @@ C2 = rho2*phi';
 
 C = [C1 0; 0 C2];
 for j = 1:size(G,2)
-    aux = phi*G(j,j);
-%     for n = 1:1:3
-    [mag, phase, wout] = bode(aux);
-    [X, Y] = pol2cart(phase,mag); 
-    Re(j,:,:,:) = X;
-%     end
+    Gw(j) = freqresp(G(j,j));
+    Gw(j) = squeeze(Gw);
 end

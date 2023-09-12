@@ -32,7 +32,9 @@ Kpi = Kp1 + Ki1/s;
 H1 = feedback(G*Kpi,1);
 figure(2);
 step(H1);
-%%
+
+%% Análise comparativa entre o sistema de controle em malha fechada com os 
+%% parâmetros controlador PID calculados e obtidos por meio do algoritmo de otimização 
 
 s=tf('s'); 
 
@@ -80,7 +82,7 @@ MT_max=1.01;
 Ju_max=100;
 x = [Kp2, Ki2, Kd2];
 
-% Otimização dos parâmetro do controlador
+% Otimização dos parâmetros do controlador
 options = optimset('Algorithm','active-set');
 x=fmincon(@(x) objfun(x,s,G),x,[],[],[],[],...
 [], [], @(x)confun(x,s,G,MS_max,MT_max,Ju_max), options);
