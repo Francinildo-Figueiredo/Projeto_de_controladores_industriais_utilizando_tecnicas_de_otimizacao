@@ -221,7 +221,7 @@ Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
 MS_max=1.6;
 MT_max=1;
 % Jv_max=inf;
-Ju_max=100;
+Ju_max=20;
 % x = [Kp11, Kp11/Ti11, 0];
 x = [5 0.1 0.2];
 
@@ -252,9 +252,7 @@ e_abs = abs(1-y);
 IAE = sum(e_abs)
 step(H,t);
 legend('SIMC', 'Otimizado', 'Location','southeast');
-Kp
-Ti = Kp/Ki
-Td = Kp/Kd
+x
 
 %% Otimização dos controlador PI da malha 2
 
@@ -270,10 +268,10 @@ Jub=norm(feedback(Cpi22, pade(G22_med)),inf)
 MS_max=1.6;
 MT_max=1;
 % Jv_max=inf;
-Ju_max=100;
+Ju_max=inf;
 Ki22 = Kp22/Ti22;
 % x = [Kp22, Ki22, 0];
-x = [4, 0.1, 0.2];
+x = [8, 0.3, 6];
 
 % Otimização dos parâmetro do controlador PI
 options = optimset('Algorithm','active-set');
@@ -302,9 +300,7 @@ e_abs = abs(1-y);
 IAE = sum(e_abs)
 step(H,t);
 legend('SIMC', 'Otimizado', 'Location','southeast');
-Kp
-Ti = Kp/Ki
-Td = Kp/Kd
+x
 
 %% Otimização por meio do CVX
 
