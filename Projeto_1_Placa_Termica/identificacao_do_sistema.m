@@ -125,7 +125,7 @@ T11_med = (T11_aq + T11_resf)/2;
 L11_med = (L11_aq + L11_resf)/2;
 
 G11_med = tf(K11_med, [T11_med 1], 'iodelay', L11_med);
-t = 0:1:length(pv1_aq)-1;
+t = 0:1:length(mv1_aq)-1;
 Sis_id_aq = lsim(G11_med, mv1_aq - 20, t);
 t = 0:1:length(pv1_resf)-1;
 Sis_id_resf = lsim(G11_med, -10*ones(size(t)), t);
@@ -218,12 +218,12 @@ Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
 Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
 
 % Critérios de restrição
-MS_max=1.6;
-MT_max=1.0;
+MS_max=1.7;
+MT_max=1;
 Jv_max=inf;
 Ju_max=inf;
 % x = [Kp11, Kp11/Ti11, 0];
-x = [0.1 0.12 0.34];
+x = [2 0.3 0.1];
 
 % Otimização dos parâmetro do controlador PI
 options = optimset('Algorithm','active-set');
@@ -258,18 +258,18 @@ Jvb=norm(feedback(pade(G22_med)/s,Cpi22),inf)
 Jub=norm(feedback(Cpi22, pade(G22_med)),inf)
 
 % Critérios de restrição
-% MS_max=1.8;
-MT_max=1.5;
+MS_max=1.6;
+MT_max=1;
 Jv_max=inf;
 Ju_max=inf;
 Ki22 = Kp22/Ti22;
 x = [Kp22, Ki22, 0];
-% x = [12, 0.1, 0];
+% x = [4, 0.3, 0];
 
 % Otimização dos parâmetro do controlador PI
 options = optimset('Algorithm','active-set');
 x=fmincon(@(x) objfun(x,s,G22_med),x,[],[],[],[],...
-[], [], @(x)confun(x,s,G22_med,MT_max,Jv_max,Ju_max), options);
+[], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Jv_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
 Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
@@ -281,12 +281,19 @@ MT=norm(feedback(pade(G22_med)*Kpid,1),inf)
 Jv=norm(feedback(pade(G22_med)/s,Kpid),inf)
 Ju=norm(feedback(Kpid, pade(G22_med)),inf)
 
-step(H22);
+t = 0:1:300;
+y22 = step(H22, t);
+e_abs22 = abs(1-y22);
+IAE22 = sum(e_abs22)
+step(H22, t);
 title('Resposta ao degrau para a malha 2');
 hold on;
-step(H);
+y = step(H,t);
+e_abs = abs(1-y);
+IAE = sum(e_abs)
+step(H,t);
 legend('SIMC', 'Otimizado', 'Location','southeast');
-stepinfo(H)
+% stepinfo(H)
 
 %% Otimização por meio do CVX
 
