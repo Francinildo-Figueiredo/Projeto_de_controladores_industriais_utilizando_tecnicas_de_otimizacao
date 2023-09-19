@@ -218,12 +218,11 @@ Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
 Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
 
 % Critérios de restrição
-MS_max=1.6;
+MS_max=1.5;
 MT_max=1.0;
 Jv_max=inf;
 Ju_max=inf;
-% x = [Kp11, Kp11/Ti11, 0];
-x = [0.1 0.12 0.34];
+x = [Kp11, Kp11/Ti11, 0];
 
 % Otimização dos parâmetro do controlador PI
 options = optimset('Algorithm','active-set');
