@@ -1,53 +1,14 @@
-% Equivalente de segunda ordem com atraso
+%% Projeto de controladores PID por meio de Genetic Algorithm (GA)
 
 s=tf('s'); 
-%G=1/((1+s)*(1+0.5*s)*(1+0.25*s)); % G1
-%G=1/(1+s)^3;                      % G2
-%G=exp(-0.3*s)/((1+s)*(1+0.5*s));  % G3
-%G=1/(s*(1+s)*(1+0.2*s));
-%G = exp(-s)/(s+1)^4;
-% figure(1);
-% step(feedback(G,1));
-
-% 1ª ordem
-T = 0;
-%taui = [1, 0.5, 0.25]; % G1
-%taui = [1, 1, 1];      % G2
-% taui = [1, 0.5, 0];   % G3
-taui = [1, 0.2, 0];    %G4
-%taui = [1,1,1,1];
-theta0 = 0;
-K = 1;
-tau1 = taui(1) + taui(2)/2;
-theta = theta0 + taui(2)/2 + sum(taui(3:end)) + sum(T);
-G1a = K*exp(-theta*s)/(tau1*s + 1);
-
-% Calculando os parâmetros do controlador PI de acordo com o SIMC
-tau_c = theta;
-Kp1 = (1/K)*(tau1/(tau_c+theta));
-Ti1 = min(tau1, 4*(tau_c + theta));
-Ki1 = Kp1/Ti1;
-
-Kpi = Kp1 + Ki1/s;
-H1 = feedback(G*Kpi,1);
-figure(2);
-step(H1);
-
-%% Análise comparativa entre o sistema de controle em malha fechada com os 
-%% parâmetros controlador PID calculados e obtidos por meio do algoritmo de otimização 
-
-s=tf('s'); 
-
 % G=1/(1+s)^3;                        % G1
 G=exp(-0.3*s)/((1+s)*(1+0.5*s));   % G2
 
 
-% 2ª ordem
+% Obtendo as aproximaçãoes de Half-rule
 T = 0;
-taui = [1, 0.5, 0];   % G1
-% taui = [1, 1, 1];      % G2
-%taui = [1, 0.2, 0];    %G4
-%taui = [1,1,1,1];
+% taui = [1, 1, 1];     % G1
+taui = [1, 0.5, 0];   % G2
 theta0 = 0.3;
 K = 1;
 tau1 = taui(1);
@@ -82,14 +43,15 @@ MT_max=1.01;
 Ju_max=100;
 Gm_Max = 3;
 Pm_Max = 60;
+
 x = [Kp2, Ki2, Kd2];
 
-% Otimização dos parâmetros do controlador
+% Otimização do controlador por meio do algoritmo genético
 lb = [0, 0, 0];
 ub = [30, 10, 10];
-options = optimset('Algorithm','active-set', 'display', 'iter');
-x=fmincon(@(x) objfun(x,s,G),x,[],[],[],[],...
-lb, ub, @(x)confun(x,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max), options);
+options = optimoptions('ga', 'display', 'iter');
+x = ga(@(x) objfun(x,s,G),3,[],[],[],[],...
+lb,ub,@(x)confun(x,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
 Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
@@ -105,9 +67,3 @@ stepinfo(H)
 title('Planta G_1');
 legend('Controlador SIMC', 'Controlador otimizado', 'location', 'best','FontSize', 10);
 grid on;
-
-
-
-
-
-

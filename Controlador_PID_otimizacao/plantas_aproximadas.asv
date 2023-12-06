@@ -85,11 +85,10 @@ Pm_Max = 60;
 x = [Kp2, Ki2, Kd2];
 
 % Otimização dos parâmetros do controlador
-lb = [0, 0, 0];
-ub = [30, 10, 10];
+
 options = optimset('Algorithm','active-set', 'display', 'iter');
 x=fmincon(@(x) objfun(x,s,G),x,[],[],[],[],...
-lb, ub, @(x)confun(x,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max), options);
+[], [], @(x)confun(x,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max));
 
 Kp = x(1); Ki = x(2); Kd = x(3);
 Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
