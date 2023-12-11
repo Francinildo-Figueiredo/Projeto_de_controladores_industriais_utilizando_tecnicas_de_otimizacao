@@ -1,5 +1,9 @@
 %% Análise comparativa entre os algoritmos de otimização 
 
+clc   %clears the command window
+clear all   % clears the previous work space
+close all    % closes the privous graphical objects(figures)
+
 s=tf('s'); 
 % G=1/(1+s)^3;                        % G1
 G=exp(-0.3*s)/((1+s)*(1+0.5*s));   % G2
@@ -51,10 +55,10 @@ x1 = [Kp1, Ki1, Kd1];
 lb = [0, 0, 0];
 ub = [30, 10, 10];
 options = optimoptions('ga', 'display', 'iter');
-x1 = ga(@(x1) objfun(x1,s,G),3,[],[],[],[],...
+x2 = ga(@(x1) objfun(x1,s,G),3,[],[],[],[],...
 lb,ub,@(x1)confun(x1,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max), options);
 
-Kp2 = x1(1); Ki2 = x1(2); Kd2 = x1(3);
+Kp2 = x2(1); Ki2 = x2(2); Kd2 = x2(3);
 Kpid2 = Kp2 + Ki2/s + Kd2*s/(1+0.01*s);
 H2 = feedback(G*Kpid2,1);
 
@@ -68,12 +72,11 @@ MT_ga=norm(feedback(pade(G)*Kpid2,1),inf)
 % Otimização dos parâmetros do controlador por meio da fmincon
 lb = [0, 0, 0];
 ub = [30, 10, 10];
-x2 = [Kp1, Ki1, Kd1];
 options = optimoptions('fmincon', 'display', 'iter');
-x2=fmincon(@(x2) objfun(x2,s,G),x2,[],[],[],[],...
-lb, ub, @(x2)confun(x2,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max), options);
+x3=fmincon(@(x1) objfun(x1,s,G),x1,[],[],[],[],...
+lb, ub, @(x1)confun(x1,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max), options);
 
-Kp3 = x2(1); Ki3 = x2(2); Kd3 = x2(3);
+Kp3 = x3(1); Ki3 = x3(2); Kd3 = x3(3);
 Kpid3 = Kp3 + Ki3/s + Kd3*s/(1+0.01*s);
 H3 = feedback(G*Kpid3,1);
 
