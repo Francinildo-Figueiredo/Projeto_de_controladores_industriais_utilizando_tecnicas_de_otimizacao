@@ -28,7 +28,7 @@ Kpid1 = Kp1 + Ki1/s + Kd1*s/(1+0.01*s);
 H1 = feedback(G*Kpid1,1);
 figure(3);
 step(H1);
-% hold on;
+hold on;
 
 % Criterios antes da otimização
 MSb=norm(feedback(1,pade(G)*Kpid1),inf)
@@ -43,15 +43,15 @@ MT_max=1.01;
 %Jv_max=0.66;
 Ju_max=100;
 Gm_Max = 3;
-Pm_Max = 45;
+Pm_Max = 65;
 
 x1 = [Kp1, Ki1, Kd1];
 
 % Otimização do controlador por meio do algoritmo genético
-lb = [0, 0, 0];
-ub = [30, 10, 10];
-x2 = PSO_non_linear_constraint(@(x1) objfun(x1,s,G), @(x1)confunC(x1,s,G,...
-MS_max,MT_max,Ju_max, Gm_Max, Pm_Max),@(x1)[],lb,ub,3,100,50);
+lb = [1, eps, eps];
+ub = [10, 10, 10];
+x2 = PSO_non_linear_constraint(@(x) objfun(x,s,G), @(x)confunC(x,s,G,...
+MS_max,MT_max,Ju_max, Gm_Max, Pm_Max),@(x)[],lb,ub,3,600,20);
 
 Kp2 = x2(1); Ki2 = x2(2); Kd2 = x2(3);
 Kpid2 = Kp2 + Ki2/s + Kd2*s/(1+0.01*s);
