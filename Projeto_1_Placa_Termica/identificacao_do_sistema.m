@@ -222,6 +222,7 @@ MS_max=1.6;
 MT_max=1;
 % Jv_max=inf;
 Ju_max=100;
+Ki11 = Kp11/Ti11;
 % x = [Kp11, Kp11/Ti11, 0];
 x = [5 0.1 0.2];
 
@@ -231,14 +232,14 @@ x=fmincon(@(x) objfun_J(x),x,[],[],[],[],...
 [], [], @(x)confun(x,s,G11_med,MS_max,MT_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
-Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
-H = feedback(G11_med*Kpid,1);
+Kpid1 = Kp + Ki/s + Kd*s/(1+0.01*s);
+H = feedback(G11_med*Kpid1,1);
 
 % Critérios após a otimização
-MS=norm(feedback(1,pade(G11_med)*Kpid),inf)
-MT=norm(feedback(pade(G11_med)*Kpid,1),inf)
-Jv=norm(feedback(pade(G11_med)/s,Kpid),inf)
-Ju=norm(feedback(Kpid, pade(G11_med)),inf)
+MS=norm(feedback(1,pade(G11_med)*Kpid1),inf)
+MT=norm(feedback(pade(G11_med)*Kpid1,1),inf)
+Jv=norm(feedback(pade(G11_med)/s,Kpid1),inf)
+Ju=norm(feedback(Kpid1, pade(G11_med)),inf)
 
 t = 0:1:100;
 y11 = step(H11, t);
@@ -281,14 +282,14 @@ x=fmincon(@(x) objfun_J(x),x,[],[],[],[],...
 [], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
-Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
-H = feedback(G22_med*Kpid,1);
+Kpid2 = Kp + Ki/s + Kd*s/(1+0.01*s);
+H = feedback(G22_med*Kpid2,1);
 
 % Critérios após a otimização
-MS=norm(feedback(1,pade(G22_med)*Kpid),inf)
-MT=norm(feedback(pade(G22_med)*Kpid,1),inf)
-Jv=norm(feedback(pade(G22_med)/s,Kpid),inf)
-Ju=norm(feedback(Kpid, pade(G22_med)),inf)
+MS=norm(feedback(1,pade(G22_med)*Kpid2),inf)
+MT=norm(feedback(pade(G22_med)*Kpid2,1),inf)
+Jv=norm(feedback(pade(G22_med)/s,Kpid2),inf)
+Ju=norm(feedback(Kpid2, pade(G22_med)),inf)
 
 t = 0:1:150;
 y22 = step(H22, t);
@@ -306,47 +307,38 @@ Kp
 Ti = Kp/Ki
 Td = Kp/Kd
 
-%% Otimização por meio do CVX
+%% Otimização com controle multivariável
 
-s = tf('s');
+G = [G11_med, G12_med; G21_med, G22_med];
+C = [Cpi11, 0; 0, Cpi22];
+I = eye(2);
 
 % Criterios antes da otimização
-MSb=norm(feedback(1,pade(G11_med)*Cpi11),inf)
-MTb=norm(feedback(pade(G11_med)*Cpi11,1),inf)
-Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
-Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
+MSb=norm(feedback(I,pade(G)*C),inf)
+MTb=norm(feedback(pade(G)*C,I),inf)
+Jvb=norm(feedback(pade(G)/s,C),inf)
+Jub=norm(feedback(C, pade(G)),inf)
 
 % Critérios de restrição
-MS_max=1.8;
-MT_max=1.5;
-% Jv_max=0.15;
+MS_max=1.6;
+MT_max=1.3;
 Ju_max=100;
-% x = [Kp11, Kp11/Ti11, 0];
-Fd = [1 1/s s/(1+0.01*s)];
-n = 3;
+% x1 = [Kp11, Ki11, 0, Kp22, Ki22, 0];
+x1 = [3,1,0.2,5,1,0.3];
 
-cvx_begin
-    variable x(1,n)
-    minimize(norm(feedback(pade(G11_med)/s,x*Fd'),inf))
-    subject to
-        norm(feedback(1,pade(G11_med)*(x*Fd')),inf) <= MS_max
-        norm(feedback(pade(G11_med)*(x*Fd'),1),inf) <= MT_max
-        norm(feedback(x*Fd', pade(G11_med)),inf)    <= Ju_max
-cvx_end
+% Otimização do controlador por meio da fmincon
+lb = [0,0,0,0,0,0];
+ub = [10,10,5,10,10,5];
+options = optimoptions('fmincon', 'display', 'iter');
+x2=fmincon(@(x) objfun(x,s,G),x1,[],[],[],[],...
+lb, ub, @(x)confun(x,s,G,MS_max,MT_max,Ju_max), options);
 
-Kp = x(1); Ki = x(2); Kd = x(3);
-Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
-H = feedback(G11_med*Kpid,1);
+Kpid1 = x2(1) + x2(2)/s; + x2(3)*s/(1+0.01*s);
+Kpid2 = x2(4) + x2(5)/s; + x2(6)*s/(1+0.01*s);
+Kpid  = [Kpid1, 0; 0, Kpid2];
 
 % Critérios após a otimização
-MS=norm(feedback(1,pade(G11_med)*Kpid),inf)
-MT=norm(feedback(pade(G11_med)*Kpid,1),inf)
-Jv=norm(feedback(pade(G11_med)/s,Kpid),inf)
-Ju=norm(feedback(Kpid, pade(G11_med)),inf)
-
-step(H11);
-title('Resposta ao degrau para a malha 1');
-hold on;
-step(H);
-legend('SIMC', 'Otimizado', 'Location','southeast');
-stepinfo(H)
+MS=norm(feedback(I,pade(G)*Kpid),inf)
+MT=norm(feedback(pade(G)*Kpid,I),inf)
+Jv=norm(feedback(pade(G)/s,Kpid),inf)
+Ju=norm(feedback(Kpid, pade(G)),inf)
