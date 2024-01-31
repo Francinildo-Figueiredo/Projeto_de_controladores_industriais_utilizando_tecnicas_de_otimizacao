@@ -41,17 +41,17 @@ MS_max=1.5;
 MT_max=1.01;
 %Jv_max=0.66;
 Ju_max=100;
-Gm_Max = 3;
-Pm_Max = 60;
+% Gm_Max = 3;
+% Pm_Max = 45;
 
-x = [Kp2, Ki2, Kd2];
+% x = [Kp2, Ki2, Kd2];
 
 % Otimização do controlador por meio do algoritmo genético
 lb = [0, 0, 0];
 ub = [30, 10, 10];
 options = optimoptions('ga', 'display', 'iter');
 x = ga(@(x) objfun(x,s,G),3,[],[],[],[],...
-lb,ub,@(x)confun(x,s,G,MS_max,MT_max,Ju_max, Gm_Max, Pm_Max), options);
+lb,ub,@(x)confun(x,s,G,MS_max,MT_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
 Kpid = Kp + Ki/s + Kd*s/(1+0.01*s);
