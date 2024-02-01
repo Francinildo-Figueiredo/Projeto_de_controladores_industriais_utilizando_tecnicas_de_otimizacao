@@ -52,9 +52,8 @@ Ju_max=100;
 % Gm_Max = 3;
 % Pm_Max = 45;
 
-% x1 = [Kp1, Ki1, Kd1];
+x1 = [Kp1, Ki1, Kd1];
 % x1 = [0,0,0];
-x1=[0,0,0];
 
 % Otimização do controlador por meio da fmincon
 lb = [0, 0, 0];

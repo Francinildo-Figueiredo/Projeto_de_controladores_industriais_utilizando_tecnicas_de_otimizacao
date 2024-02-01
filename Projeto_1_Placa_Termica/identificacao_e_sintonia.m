@@ -218,17 +218,18 @@ Jvb=norm(feedback(pade(G11_med)/s,Cpi11),inf)
 Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
 
 % Critérios de restrição
-MS_max=1.6;
+MS_max=1.5;
 MT_max=1;
 % Jv_max=inf;
 Ju_max=100;
 Ki11 = Kp11/Ti11;
-% x = [Kp11, Kp11/Ti11, 0];
-x = [5 0.1 0.2];
+x = [Kp11, Kp11/Ti11, 0];
+% x = [5 0.1 0.2];
+% x = [0,0,0];
 
 % Otimização dos parâmetro do controlador PI
-options = optimset('Algorithm','active-set');
-x=fmincon(@(x) objfun_J(x),x,[],[],[],[],...
+options = optimoptions('fmincon', 'display', 'iter');
+x=fmincon(@(x) objfun(x,s,G11_med),x,[],[],[],[],...
 [], [], @(x)confun(x,s,G11_med,MS_max,MT_max,Ju_max), options);
 
 Kp = x(1); Ki = x(2); Kd = x(3);
@@ -252,7 +253,7 @@ y = step(H,t);
 e_abs = abs(1-y);
 IAE = sum(e_abs)
 step(H,t);
-legend('SIMC', 'Otimizado', 'Location','southeast');
+legend('SIMC', 'fmincon', 'Location','southeast');
 Kp
 Ti = Kp/Ki
 Td = Kp/Kd

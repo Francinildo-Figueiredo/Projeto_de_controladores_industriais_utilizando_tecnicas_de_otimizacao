@@ -42,8 +42,8 @@ Jub=norm(feedback(Kpid1, pade(G)),inf)
 [Gmb,Pmb] = margin(G*Kpid1)
 
 % Critérios de restrição
-MS_max=1.5;
-MT_max=1.01;
+MS_max=1.7;
+MT_max=1.3;
 %Jv_max=0.66;
 Ju_max=100;
 % Gm_Max = 3;
