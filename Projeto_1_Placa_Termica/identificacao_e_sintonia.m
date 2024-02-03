@@ -166,16 +166,16 @@ G22_med = tf(K22_med, [T22_med 1], 'iodelay', L22_med);
 %% Com base nos parâmetros dos modelos médios de G11 e G22
 
 % PI para o modelo médio de G11
-Kp11 = T11_med/(2*K11_med*L11_med);
-Ti11 = min(T11_med, 8*L11_med);
+Kp11_SIMC = T11_med/(2*K11_med*L11_med);
+Ti11_SIMC = min(T11_med, 8*L11_med);
 
-Cpi11 = pid(Kp11, Kp11/Ti11);
-H11 =feedback(Cpi11*G11_med,1);
-step(H11);
+Cpi11 = pid(Kp11_SIMC, Kp11_SIMC/Ti11_SIMC);
+H11_SIMC =feedback(Cpi11*G11_med,1);
+step(H11_SIMC);
 hold on;
-stepinfo(H11);
+stepinfo(H11_SIMC);
 t = 0:1:250;
-Sis_id_resf = lsim(H11, -1*ones(size(t)), t);
+Sis_id_resf = lsim(H11_SIMC, -1*ones(size(t)), t);
 plot(t+250, Sis_id_resf);
 
 % PI para o modelo médio de G22
@@ -219,44 +219,65 @@ Jub=norm(feedback(Cpi11, pade(G11_med)),inf)
 
 % Critérios de restrição
 MS_max=1.5;
-MT_max=1;
+MT_max=1.1;
 % Jv_max=inf;
 Ju_max=100;
-Ki11 = Kp11/Ti11;
-x = [Kp11, Kp11/Ti11, 0];
+Ki11_SIMC = Kp11_SIMC/Ti11_SIMC;
+x11_SIMC = [Kp11_SIMC, Ki11_SIMC];
 % x = [5 0.1 0.2];
 % x = [0,0,0];
 
-% Otimização dos parâmetro do controlador PI
+% Otimização do controlador por meio da fmincon
+lb = [0, 0.085];
+ub = [30, 10];
 options = optimoptions('fmincon', 'display', 'iter');
-x=fmincon(@(x) objfun(x,s,G11_med),x,[],[],[],[],...
-[], [], @(x)confun(x,s,G11_med,MS_max,MT_max,Ju_max), options);
+x11_SQP=fmincon(@(x) objfun(x,s,G11_med),x11_SIMC,[],[],[],[],...
+lb, ub, @(x)confun(x,s,G11_med,MS_max,MT_max,Ju_max), options);
 
-Kp = x(1); Ki = x(2); Kd = x(3);
-Kpid1 = Kp + Ki/s + Kd*s/(1+0.01*s);
-H = feedback(G11_med*Kpid1,1);
+Kp11 = x11_SQP(1); Ki11 = x11_SQP(2);
+Kpi11_SQP = Kp11 + Ki11/s;
+H11_SQP = feedback(G11_med*Kpi11_SQP,1);
 
 % Critérios após a otimização
-MS=norm(feedback(1,pade(G11_med)*Kpid1),inf)
-MT=norm(feedback(pade(G11_med)*Kpid1,1),inf)
-Jv=norm(feedback(pade(G11_med)/s,Kpid1),inf)
-Ju=norm(feedback(Kpid1, pade(G11_med)),inf)
+Jv11_SQP=norm(feedback(pade(G11_med)/s,Kpi11_SQP),inf)
+Ju11_SQP=norm(feedback(Kpi11_SQP, pade(G11_med)),inf)
+MS11_SQP=norm(feedback(1,pade(G11_med)*Kpi11_SQP),inf)
+MT11_SQP=norm(feedback(pade(G11_med)*Kpi11_SQP,1),inf)
+[Gm11_SQP,Pm11_SQP] = margin(G11_med*Kpi11_SQP)
+%%
+% Otimização do controlador por meio do algoritmo genético
+lb = [0, 0.085];
+ub = [6, 0.1];
+options = optimoptions('ga', 'display', 'iter');
+x11_GA = ga(@(x) objfun(x,s,G11_med),2,[],[],[],[],...
+lb,ub,@(x)confun(x,s,G11_med,MS_max,MT_max,Ju_max), options);
+
+Kp11 = x11_GA(1); Ki11 = x11_GA(2);
+Kpi11_GA = Kp11 + Ki11/s;
+H11_GA = feedback(G11_med*Kpi11_GA,1);
+
+% Critérios após a otimização
+Jv11_GA=norm(feedback(pade(G11_med)/s,Kpi11_GA),inf)
+Ju11_GA=norm(feedback(Kpi11_GA, pade(G11_med)),inf)
+MS11_GA=norm(feedback(1,pade(G11_med)*Kpi11_GA),inf)
+MT11_GA=norm(feedback(pade(G11_med)*Kpi11_GA,1),inf)
 
 t = 0:1:100;
-y11 = step(H11, t);
-e_abs11 = abs(1-y11);
-IAE11 = sum(e_abs11)
-step(H11, t);
-title('Resposta ao degrau para a malha 1');
+y11_SIMC = step(H11_SIMC, t);
+IAE11_SIMC = sum(abs(1-y11_SIMC))
+step(H11_SIMC, t);
 hold on;
-y = step(H,t);
-e_abs = abs(1-y);
-IAE = sum(e_abs)
-step(H,t);
-legend('SIMC', 'fmincon', 'Location','southeast');
-Kp
-Ti = Kp/Ki
-Td = Kp/Kd
+y11_SQP = step(H11_SQP,t);
+IAE11_SQP = sum(abs(1-y11_SQP))
+step(H11_SQP,t);
+hold on;
+y11_GA = step(H11_GA,t);
+IAE11_GA = sum(abs(1-y11_GA))
+step(H11_GA,t);
+legend('SIMC', 'SQP', 'GA', 'Location','southeast');
+title('Resposta ao degrau para a malha 1');
+Ti11_SQP = x11_SQP(1)/x11_SQP(2);
+Ti11_GA  = x11_GA(1)/x11_GA(2);
 
 %% Otimização dos controlador PI da malha 2
 
