@@ -5,15 +5,15 @@ clear    % clears the previous work space
 close all    % closes the privous graphical objects(figures)
 
 s=tf('s'); 
-% G=1/(1+s)^3;                     % G1
-G=exp(-0.3*s)/((1+s)*(1+0.5*s));   % G2
+G=1/(1+s)^3;                     % G1
+% G=exp(-0.3*s)/((1+s)*(1+0.5*s));   % G2
 
 
 % Obtendo as aproximaçãoes de Half-rule
 T = 0;
-% taui = [1, 1, 1];   % G1
-taui = [1, 0.5, 0];   % G2
-theta0 = 0.3;
+taui = [1, 1, 1];   % G1
+% taui = [1, 0.5, 0];   % G2
+theta0 = 0;
 K = 1;
 tau1 = taui(1);
 tau2 = taui(2) + taui(3)/2;
@@ -47,7 +47,7 @@ Jub=norm(feedback(Kpid1, pade(G)),inf)
 
 % Critérios de restrição
 MS_max=1.5;
-MT_max=1.01;
+MT_max=1.1;
 Ju_max=100;
 % Gm_Max = 3;
 % Pm_Max = 45;

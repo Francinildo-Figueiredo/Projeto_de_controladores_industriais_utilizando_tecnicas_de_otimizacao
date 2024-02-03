@@ -43,7 +43,7 @@ Jub=norm(feedback(Kpid1, pade(G)),inf)
 
 % Critérios de restrição
 MS_max=1.7;
-MT_max=1.3;
+MT_max=1.05;
 %Jv_max=0.66;
 Ju_max=100;
 % Gm_Max = 3;
@@ -52,7 +52,7 @@ Ju_max=100;
 x1 = [Kp1, Ki1, Kd1];
 
 % Otimização dos parâmetros do controlador por meio da fmincon
-lb = [0, 0, 0];
+lb = [0, 0.5, 0];
 ub = [30, 10, 10];
 options = optimoptions('fmincon', 'display', 'iter');
 x2=fmincon(@(x1) objfun(x1,s,G),x1,[],[],[],[],...
@@ -70,7 +70,7 @@ MT_fmincon=norm(feedback(pade(G)*Kpid2,1),inf)
 [Gm_fmincon,Pm_fmincon] = margin(G*Kpid2)
 
 % Otimização do controlador por meio do algoritmo genético
-lb = [0, 0, 0];
+lb = [0, 0.5, 0];
 ub = [30, 10, 10];
 options = optimoptions('ga', 'display', 'iter');
 x3 = ga(@(x) objfun(x,s,G),3,[],[],[],[],...

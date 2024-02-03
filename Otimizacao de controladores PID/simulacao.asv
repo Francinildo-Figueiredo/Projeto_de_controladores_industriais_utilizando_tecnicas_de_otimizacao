@@ -31,16 +31,15 @@ t = out1.tout;
 % Controlador obtido por meio do SQP
 
 % Kp = 2.0159; Ki = 0.7581; Kd = 0.9416;
-% Kp = 2.2162;    Ki = 0.8776;   Kd = 0.9778;
-Kp = 2.2162;   Ki = 0.8776;   Kd = 0.9778;
+Kp = 2.2162;    Ki = 0.8776;   Kd = 0.9778;
+
 
 out2 = sim('rejeicao_a_disturbios', 'ReturnWorkspaceOutputs', 'on');
 y_SQP = out2.simout.Data(:,1);
 
 % Controlador obtido por meio do GA
 
-% Kp = 2.1919; Ki = 0.8788; Kd = 0.9781;
-Kp = 2.4244; Ki = 0.7883; Kd = 0.9758;
+Kp = 2.0198; Ki = 0.7784; Kd = 0.9798;
 
 out3 = sim('rejeicao_a_disturbios', 'ReturnWorkspaceOutputs', 'on');
 y_GA = out3.simout.Data(:,1);
