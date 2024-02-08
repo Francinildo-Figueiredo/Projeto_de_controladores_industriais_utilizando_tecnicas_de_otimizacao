@@ -279,88 +279,30 @@ title('Resposta ao degrau para a malha 1');
 Ti11_SQP = x11_SQP(1)/x11_SQP(2);
 Ti11_GA  = x11_GA(1)/x11_GA(2);
 
-%% Otimização dos controlador PI da malha 2
+%% Resultados obtidos no experimento para cada método de sintonia
 
-s = tf('s');
+dobt_SIMC = load('exp03022024125543.mat');
+dobt_SQP  = load('exp03022024143419.mat');
+dobt_GA   = load('exp03022024152205.mat');
 
-% Criterios antes da otimização
-MSb=norm(feedback(1,pade(G22_med*Cpi22)),inf)
-MTb=norm(feedback(pade(G22_med)*Cpi22,1),inf)
-Jvb=norm(feedback(pade(G22_med)/s,Cpi22),inf)
-Jub=norm(feedback(Cpi22, pade(G22_med)),inf)
+% Controle realizado pelo método de otimização GA
+subplot(2,1,1);
+plot(dobt_GA.pv1(154:576), 'LineWidth', 2);hold on;
+plot(dobt_GA.pv2(154:576), '-.', 'LineWidth', 1.5);hold on;
+plot(dobt_GA.sp1(154:576), '--', 'LineWidth', 1.5);
+xlim([0, 430]);
+ylim([30, 50]);
+xlabel('t(s)', 'fontsize', 12);
+ylabel('T(°C)', 'fontsize', 12);
+legend('PV1', 'PV2', 'SP1','location','southeast', 'fontsize', 10);
 
-% Critérios de restrição
-MS_max=1.6;
-MT_max=1;
-% Jv_max=inf;
-Ju_max=100;
-Ki22 = Kp22/Ti22;
-% x = [Kp22, Ki22, 0];
-x = [4, 0.1, 0.2];
+subplot(2,1,2);
+plot(dobt_GA.mv1(154:576), 'LineWidth', 2);hold on;
+plot(dobt_GA.mv2(154:576), '-.', 'LineWidth', 1.5);
+xlim([0, 430]);
+ylim([0, 50]);
+xlabel('t(s)', 'fontsize', 12);
+ylabel('MV(%)', 'fontsize', 12);
+legend('MV1', 'MV2','location','best', 'fontsize', 10);
 
-% Otimização dos parâmetro do controlador PI
-options = optimset('Algorithm','active-set');
-x=fmincon(@(x) objfun_J(x),x,[],[],[],[],...
-[], [], @(x)confun(x,s,G22_med,MS_max,MT_max,Ju_max), options);
 
-Kp = x(1); Ki = x(2); Kd = x(3);
-Kpid2 = Kp + Ki/s + Kd*s/(1+0.01*s);
-H = feedback(G22_med*Kpid2,1);
-
-% Critérios após a otimização
-MS=norm(feedback(1,pade(G22_med)*Kpid2),inf)
-MT=norm(feedback(pade(G22_med)*Kpid2,1),inf)
-Jv=norm(feedback(pade(G22_med)/s,Kpid2),inf)
-Ju=norm(feedback(Kpid2, pade(G22_med)),inf)
-
-t = 0:1:150;
-y22 = step(H22, t);
-e_abs22 = abs(1-y22);
-IAE22 = sum(e_abs22)
-step(H22, t);
-title('Resposta ao degrau para a malha 2');
-hold on;
-y = step(H,t);
-e_abs = abs(1-y);
-IAE = sum(e_abs)
-step(H,t);
-legend('SIMC', 'Otimizado', 'Location','southeast');
-Kp
-Ti = Kp/Ki
-Td = Kp/Kd
-
-%% Otimização com controle multivariável
-
-G = [G11_med, G12_med; G21_med, G22_med];
-C = [Cpi11, 0; 0, Cpi22];
-I = eye(2);
-
-% Criterios antes da otimização
-MSb=norm(feedback(I,pade(G)*C),inf)
-MTb=norm(feedback(pade(G)*C,I),inf)
-Jvb=norm(feedback(pade(G)/s,C),inf)
-Jub=norm(feedback(C, pade(G)),inf)
-
-% Critérios de restrição
-MS_max=1.6;
-MT_max=1.3;
-Ju_max=100;
-% x1 = [Kp11, Ki11, 0, Kp22, Ki22, 0];
-x1 = [3,1,0.2,5,1,0.3];
-
-% Otimização do controlador por meio da fmincon
-lb = [0,0,0,0,0,0];
-ub = [10,10,5,10,10,5];
-options = optimoptions('fmincon', 'display', 'iter');
-x2=fmincon(@(x) objfun(x,s,G),x1,[],[],[],[],...
-lb, ub, @(x)confun(x,s,G,MS_max,MT_max,Ju_max), options);
-
-Kpid1 = x2(1) + x2(2)/s; + x2(3)*s/(1+0.01*s);
-Kpid2 = x2(4) + x2(5)/s; + x2(6)*s/(1+0.01*s);
-Kpid  = [Kpid1, 0; 0, Kpid2];
-
-% Critérios após a otimização
-MS=norm(feedback(I,pade(G)*Kpid),inf)
-MT=norm(feedback(pade(G)*Kpid,I),inf)
-Jv=norm(feedback(pade(G)/s,Kpid),inf)
-Ju=norm(feedback(Kpid, pade(G)),inf)

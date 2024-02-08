@@ -1,15 +1,15 @@
 %% Projeto de controladores PID por meio de Genetic Algorithm (GA)
 
 s=tf('s'); 
-G=1/(1+s)^3;                        % G1
-% G=exp(-0.3*s)/((1+s)*(1+0.5*s));   % G2
+% G=1/(1+s)^3;                        % G1
+G=exp(-0.3*s)/((1+s)*(1+0.5*s));   % G2
 
 
 % Obtendo as aproximaçãoes de Half-rule
 T = 0;
-taui = [1, 1, 1];     % G1
-% taui = [1, 0.5, 0];   % G2
-theta0 = 0;
+% taui = [1, 1, 1];     % G1
+taui = [1, 0.5, 0];   % G2
+theta0 = 0.3;
 K = 1;
 tau1 = taui(1);
 tau2 = taui(2) + taui(3)/2;
@@ -38,7 +38,7 @@ Jub=norm(feedback(Kpid2, pade(G)),inf)
 
 % Critérios de restrição
 MS_max=1.6;
-MT_max=1.1;
+MT_max=1.05;
 %Jv_max=0.66;
 Ju_max=100;
 % Gm_Max = 3;
