@@ -305,4 +305,24 @@ xlabel('t(s)', 'fontsize', 12);
 ylabel('MV(%)', 'fontsize', 12);
 legend('MV1', 'MV2','location','best', 'fontsize', 10);
 
+%% Controle realizado pelo método de otimização SQP
+subplot(2,1,1);
+plot(dobt_SQP.pv1(132:526), 'LineWidth', 2);hold on;
+plot(dobt_SQP.pv2(132:526), '-.', 'LineWidth', 1.5);hold on;
+plot(dobt_SQP.sp1(132:526), '--', 'LineWidth', 1.5);
+% xlim([0, 430]);
+ylim([30, 50]);
+xlabel('t(s)', 'fontsize', 12);
+ylabel('T(°C)', 'fontsize', 12);
+legend('PV1', 'PV2', 'SP1','location','southeast', 'fontsize', 10);
+
+subplot(2,1,2);
+plot(dobt_SQP.mv1(132:526), 'LineWidth', 2);hold on;
+plot(dobt_SQP.mv2(132:526), '-.', 'LineWidth', 1.5);
+% xlim([0, 430]);
+ylim([0, 50]);
+xlabel('t(s)', 'fontsize', 12);
+ylabel('MV(%)', 'fontsize', 12);
+legend('MV1', 'MV2','location','best', 'fontsize', 10);
+
 
