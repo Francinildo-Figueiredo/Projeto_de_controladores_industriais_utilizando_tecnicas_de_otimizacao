@@ -207,7 +207,7 @@ xlabel('t(s)');
 ylabel('T(°C)');
 
 
-%% Otimização dos controlador PI da malha 1
+%% Otimização do controlador PI da malha 1 através do método SQP
 
 s = tf('s');
 
@@ -305,6 +305,12 @@ xlabel('t(s)', 'fontsize', 12);
 ylabel('MV(%)', 'fontsize', 12);
 legend('MV1', 'MV2','location','best', 'fontsize', 10);
 
+% Métricas
+t = 0:1:length(dobt_GA.sp1(154:548))-1;
+IAE_GA = sum(abs(dobt_GA.sp1(154:548)-dobt_GA.pv1(154:548)))
+ISE_GA = sum((dobt_GA.sp1(154:548)-dobt_GA.pv1(154:548)).^2)
+ITAE_GA = sum(t.*abs(dobt_GA.sp1(154:548)-dobt_GA.pv1(154:548)))
+
 %% Controle realizado pelo método de otimização SQP
 subplot(2,1,1);
 plot(dobt_SQP.pv1(132:526), 'LineWidth', 2);hold on;
@@ -325,4 +331,9 @@ xlabel('t(s)', 'fontsize', 12);
 ylabel('MV(%)', 'fontsize', 12);
 legend('MV1', 'MV2','location','best', 'fontsize', 10);
 
+% Métricas
+t = 0:1:length(dobt_SQP.sp1(132:526))-1;
+IAE_SQP = sum(abs(dobt_SQP.sp1(132:526)-dobt_SQP.pv1(132:526)))
+ISE_SQP = sum((dobt_SQP.sp1(132:526)-dobt_SQP.pv1(132:526)).^2)
+ITAE_SQP = sum(t.*abs(dobt_SQP.sp1(132:526)-dobt_SQP.pv1(132:526)))
 
